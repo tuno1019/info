@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>期末網頁版前置</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm classroom worksheet, clear and printable-feeling
+   IDEA: a printer's proof sheet with process-colour swatches
+   PICTURE: the worksheet itself; Q1–Q3 rows then six URL slots
+   COLOUR and TYPE: white paper, black ink, process cyan accent, magenta for decisions; Noto Sans TC
+   LAYOUT: one column, sticky title + three buttons, rows become stacked cards under 1000px */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#111316);--paper:light-dark(#f4f7f9,#1a1d21);--ink:light-dark(#141414,#eceff1);
+--mute:light-dark(#5d6670,#9aa4ad);--line:light-dark(#d7dde2,#2e343a);--cy:light-dark(#0087c9,#36b3ec);
+--mg:light-dark(#d6006f,#ff4fa3);--field:light-dark(#fff,#15181b)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:1360px;margin:0 auto;padding:0 max(3vw,16px)}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:3px solid var(--ink);padding:18px 0 14px}
+.bar .wrap{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.swatch{display:flex;gap:5px;flex-basis:100%}.swatch i{width:20px;height:8px;display:block}
+h1{font-size:clamp(26px,3.6vw,38px);line-height:1.1;margin:0;font-weight:900;flex:1 1 auto}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button,.btn{position:relative;font:inherit;font-size:15px;min-height:44px;padding:0 16px;border-radius:8px;border:1.5px solid var(--ink);background:var(--bg);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center}
+button.pri{background:var(--ink);color:var(--bg)}
+button:focus-visible,.btn:focus-within,textarea:focus-visible,input:focus-visible{outline:3px solid var(--cy);outline-offset:2px}
+.btn input{position:absolute;width:1px;height:1px;opacity:0}
+label.f span{display:block;font-size:14px;color:var(--mute);margin-bottom:4px}
+input[type=text],input[type=url],textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--field);border:1.5px solid var(--line);border-radius:8px;padding:9px 12px}
+textarea{min-height:104px;resize:vertical;line-height:1.55}
+section{margin:34px 0}
+.ph{display:flex;align-items:baseline;gap:14px;margin-bottom:12px}
+.ph .n{font-size:40px;font-weight:900;line-height:1;color:var(--cy)}
+#p2 .ph .n{color:var(--mg)}
+h2{font-size:24px;margin:0;line-height:1.2}
+.names{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:16px;max-width:640px}
+.grid{display:grid;gap:12px}
+.row{display:grid;grid-template-columns:80px minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr) 120px minmax(0,1.5fr);gap:12px;padding:14px;background:var(--paper);border-radius:10px;align-items:start}
+.head{background:none;padding:0 14px;font-size:14px;font-weight:700;color:var(--mute)}
+.q{font-weight:700;padding-top:6px}.q small{display:block;font-weight:400;color:var(--mute);font-size:13px}
+.cell .lab{display:none;font-size:13px;color:var(--mute);margin-bottom:4px}
+.choice{display:flex;flex-direction:column;gap:6px}
+.choice label{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--field);cursor:pointer;font-size:15px}
+.choice input{accent-color:var(--mg);width:18px;height:18px;flex:none}
+.choice label:has(input:checked){border-color:var(--mg);font-weight:700}
+.urls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ug{background:var(--paper);border-radius:10px;padding:14px;display:grid;gap:10px}
+.ug h3{margin:0;font-size:17px}.ug h3 small{font-weight:400;color:var(--mute);font-size:13px;margin-left:6px}
+.urls label{display:flex;align-items:center;gap:10px}
+.urls b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--mg);color:#fff;display:grid;place-items:center;font-size:14px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:8px;transition:transform .25s;z-index:9;max-width:90vw}
+.toast.on{transform:translateX(-50%)}
+dialog{border:0;border-radius:12px;padding:20px;max-width:min(680px,92vw);width:100%;background:var(--bg);color:var(--ink)}
+dialog::backdrop{background:#0008}dialog textarea{min-height:260px;font-size:14px}
+.hint{color:var(--mute);font-size:15px;margin:0 0 12px}
+dialog .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+footer{color:var(--mute);font-size:14px;padding:20px 0 60px;border-top:1px solid var(--line)}
+@media(max-width:1000px){.urls{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr)}.head{display:none}.cell .lab{display:block}.q{padding:0}
+.choice{flex-direction:row;flex-wrap:wrap}.choice label{flex:1 1 auto}}
+@media(max-width:640px){.names,.urls{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap">
+  <div class="swatch" aria-hidden="true"><i style="background:#00a0e0"></i><i style="background:#e4007f"></i><i style="background:#ffe100"></i><i style="background:#141414"></i></div>
+  <h1>期末網頁版前置</h1>
+  <div class="btns">
+    <label class="btn" title="選擇之前下載的 txt 檔">上傳草稿<input type="file" id="up" accept=".txt,text/plain"></label>
+    <button id="draft">下載草稿</button>
+    <button id="final" class="pri">匯出完成版</button>
+  </div>
+</div></div>
+
+<main class="wrap">
+  <section id="p1">
+    <div class="ph"><span class="n">1</span><h2>圖表比較與網頁版決定</h2></div>
+    <div class="names">
+      <label class="f"><span>A（自己）姓名</span><input type="text" id="aname" autocomplete="off"></label>
+      <label class="f"><span>B（另一位同學）姓名</span><input type="text" id="bname" autocomplete="off"></label>
+    </div>
+    <div class="grid" id="g1"></div>
+  </section>
+
+  <section id="p2">
+    <div class="ph"><span class="n">2</span><h2>完成網址</h2></div>
+    <div class="urls" id="g2"></div>
+  </section>
+</main>
+<footer class="wrap">填寫內容會暫存在這台電腦的瀏覽器中，但換電腦或清除瀏覽紀錄就會消失，請記得下載草稿。</footer>
+
+<dialog id="dlg">
+  <h2 id="dt" style="font-size:20px;margin:0 0 6px">複製內容</h2>
+  <p class="hint">這個環境無法直接下載檔案。請按「複製」，貼到記事本後另存為 .txt。</p>
+  <textarea id="dtext" readonly></textarea>
+  <div class="acts"><button id="dcopy" class="pri">複製</button><button id="dclose">關閉</button></div>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+{
+const QS=[["Q1","描述現況"],["Q2","比較差異"],["Q3","趨勢或關係"]];
+const OPTS=["保留","修改"];
+const NURL=6;
+const MARK_A="=====BEGIN-DATA (請勿修改此行以下內容)=====",MARK_B="=====END-DATA=====";
+const KEY="web-prep-v3";
+const $=id=>document.getElementById(id);
+
+$("g1").innerHTML=`<div class="row head"><div>分析問題</div><div>問題</div><div>A 期中圖表（自己）</div><div>B 期中圖表</div><div>網頁版決定</div><div>決策理由</div></div>`+
+QS.map(([k,t])=>`<div class="row"><div class="q">${k}<small>${t}</small></div>
+<label class="cell"><span class="lab">問題</span><input type="text" id="${k}_q" placeholder="這張圖要回答的問題"></label>
+<label class="cell"><span class="lab">A 期中圖表（自己）簡述</span><input type="text" id="${k}_a" placeholder="一句話簡述"></label>
+<label class="cell"><span class="lab">B 期中圖表簡述</span><input type="text" id="${k}_b" placeholder="一句話簡述"></label>
+<div class="cell"><span class="lab">網頁版決定</span><div class="choice" role="radiogroup" aria-label="${k} 網頁版決定">${OPTS.map(o=>`<label><input type="radio" name="${k}_c" value="${o}">${o}</label>`).join("")}</div></div>
+<label class="cell"><span class="lab">決策理由</span><textarea id="${k}_r"></textarea></label></div>`).join("");
+
+$("g2").innerHTML=QS.map(([k,t],q)=>`<div class="ug"><h3>${k}<small>${t}</small></h3>${[1,2].map(j=>{const n=q*2+j;return `<label><b>${j}</b><input type="url" id="u${n}" placeholder="https://" aria-label="${k} 完成網址 ${j}"></label>`}).join("")}</div>`).join("");
+
+const URL_IDS=Array.from({length:NURL},(_,i)=>"u"+(i+1));
+const MAIN_IDS=["aname","bname",...QS.flatMap(([k])=>[k+"_q",k+"_a",k+"_b",k+"_r"])];
+const TEXT_IDS=MAIN_IDS.concat(URL_IDS);
+const REQ_IDS=MAIN_IDS.concat(QS.map(([k])=>k+"_c"));
+
+function collect(){
+  const d={};TEXT_IDS.forEach(id=>d[id]=$(id).value);
+  QS.forEach(([k])=>{const c=document.querySelector(`input[name="${k}_c"]:checked`);d[k+"_c"]=c?c.value:""});
+  return d;
+}
+function apply(d){
+  TEXT_IDS.forEach(id=>{$(id).value=typeof d[id]==="string"?d[id]:""});
+  QS.forEach(([k])=>document.querySelectorAll(`input[name="${k}_c"]`).forEach(r=>r.checked=r.value===d[k+"_c"]));
+  store();
+}
+function store(){const d=collect();try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}return d}
+const v=s=>(s||"").trim()||"（未填）";
+function toTxt(d,isFinal){
+  const L=[];
+  L.push(isFinal?"【期末網頁版前置｜完成版】":"【期末網頁版前置｜草稿】");
+  L.push(`A（自己）：${v(d.aname)}　B（另一位同學）：${v(d.bname)}`);
+  L.push(`存檔時間：${new Date().toLocaleString("zh-TW")}`,"");
+  L.push("一、圖表比較與網頁版決定");
+  QS.forEach(([k,t])=>{L.push("",`${k} ${t}`,
+    `　問題：${v(d[k+"_q"])}`,
+    `　A 期中圖表（自己）：${v(d[k+"_a"])}`,
+    `　B 期中圖表：${v(d[k+"_b"])}`,
+    `　網頁版決定：${v(d[k+"_c"])}`,
+    `　決策理由：${v(d[k+"_r"])}`)});
+  L.push("","二、完成網址");
+  QS.forEach(([k,t],q)=>{L.push(`${k} ${t}`);[1,2].forEach(j=>L.push(`　${j}. ${(d["u"+(q*2+j)]||"").trim()||"—"}`))});
+  L.push("","","※ 下方資料供「上傳草稿」還原用，請勿刪改。",MARK_A,JSON.stringify(d),MARK_B,"");
+  return L.join("\r\n");
+}
+function fname(d,isFinal){
+  const s=(d.aname||"").trim().replace(/[\\/:*?"<>|]/g,"")||"未命名";
+  return `${s}_期末網頁版前置${isFinal?"_完成版":"_草稿"}.txt`;
+}
+let dl=null;
+(async()=>{try{if(window.claude&&claude.use)dl=await claude.use("downloads")}catch(e){dl=null}})();
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),2600)}
+function showCopy(text,title){$("dt").textContent=title;$("dtext").value=text;try{$("dlg").showModal()}catch(e){$("dlg").setAttribute("open","")}}
+async function save(isFinal){
+  const d=store();
+  const empty=REQ_IDS.filter(id=>!(d[id]||"").trim()).length;
+  if(isFinal&&empty&&!$("final").dataset.warned){
+    $("final").dataset.warned="1";toast(`還有 ${empty} 格未填，再按一次仍可匯出`);return;
+  }
+  delete $("final").dataset.warned;
+  const text="﻿"+toTxt(d,isFinal),name=fname(d,isFinal);
+  if(dl){
+    try{await dl.save({filename:name,data:new Blob([text],{type:"text/plain;charset=utf-8"})});toast("已存檔："+name);return}
+    catch(e){showCopy(text.slice(1),"沒有存成檔案");return}
+  }
+  try{
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));
+    a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("已下載："+name);
+  }catch(e){showCopy(text.slice(1),"複製內容")}
+}
+$("draft").addEventListener("click",()=>save(false));
+$("final").addEventListener("click",()=>save(true));
+$("up").addEventListener("change",async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{
+    const t=await f.text(),i=t.indexOf(MARK_A),j=t.indexOf(MARK_B);
+    if(i<0||j<0)throw 0;
+    apply(JSON.parse(t.slice(i+MARK_A.length,j).trim()));toast("已載入草稿，可以繼續填寫");
+  }catch(err){toast("讀不到資料，請選擇從這個頁面下載的 txt 檔")}
+});
+$("dcopy").addEventListener("click",async()=>{
+  try{await navigator.clipboard.writeText($("dtext").value);toast("已複製，貼到記事本存成 .txt")}
+  catch(e){$("dtext").select();toast("請按 Ctrl+C（Mac：⌘+C）複製")}
+});
+$("dclose").addEventListener("click",()=>$("dlg").close?$("dlg").close():$("dlg").removeAttribute("open"));
+document.addEventListener("input",store);document.addEventListener("change",store);
+try{const s=localStorage.getItem(KEY);if(s)apply(JSON.parse(s))}catch(e){}
+}
+</script>
+</body>
+</html>
